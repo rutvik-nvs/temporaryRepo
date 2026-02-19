@@ -1,0 +1,15 @@
+name: test-image
+description: Workflow to test an image
+schemaVersion: 1.0
+steps:
+  - name: LaunchTestInstance
+    action: LaunchInstance
+    onFailure: Abort
+    inputs:
+      waitFor: "ssmAgent"
+
+  - name: TerminateTestInstance
+    action: TerminateInstance
+    onFailure: Continue
+    inputs:
+      instanceId.$: "$.stepOutputs.LaunchTestInstance.instanceId"

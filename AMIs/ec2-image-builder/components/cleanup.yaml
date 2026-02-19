@@ -1,0 +1,14 @@
+name: CleanupAnsible
+schemaVersion: 1.0
+phases:
+  - name: build
+    steps:
+      - name: RemoveArtifacts
+        action: ExecuteBash
+        inputs:
+          commands:
+            - rm -rf /tmp/ansible /tmp/playbook.zip
+            - dnf remove -y ansible-core
+            - dnf autoremove -y
+            - chown -R ec2-user:ec2-user /home/ec2-user
+            - dnf -y install python3.12

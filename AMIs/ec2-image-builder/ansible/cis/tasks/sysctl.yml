@@ -1,0 +1,14 @@
+- name: copy kernel config
+  copy:
+    src: cis-kernel.conf
+    dest: /etc/sysctl.d/cis-kernel.conf
+
+- name: copy ipv4 config
+  copy:
+    src: cis-networking-ipv4.conf
+    dest: /etc/sysctl.d/cis-networking-ipv4.conf
+
+- name: copy ipv6 config
+  copy:
+    src: cis-networking-ipv6.conf
+    dest: /etc/sysctl.d/cis-networking-ipv6.conf

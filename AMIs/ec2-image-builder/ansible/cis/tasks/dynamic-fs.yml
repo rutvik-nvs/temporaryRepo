@@ -1,0 +1,67 @@
+# cramfs
+- name: Ensure kernel module 'cramfs' is disabled
+  lineinfile:
+    create: true
+    dest: /etc/modprobe.d/cramfs.conf
+    regexp: cramfs
+    line: install cramfs /bin/true
+  when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+
+- name: Ensure kernel module 'cramfs' is blacklisted
+  lineinfile:
+    create: true
+    dest: /etc/modprobe.d/cramfs.conf
+    regexp: ^blacklist cramfs$
+    line: blacklist cramfs
+  when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+
+# squashfs
+# - name: Ensure kernel module 'squashfs' is disabled
+#   # # lineinfile:
+#   #   create: true
+#     dest: /etc/modprobe.d/squashfs.conf
+#     regexp: squashfs
+#     line: install squashfs /bin/true
+#   when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+
+# - name: Ensure kernel module 'squashfs' is blacklisted
+#   lineinfile:
+#     create: true
+#     dest: /etc/modprobe.d/squashfs.conf
+#     regexp: ^blacklist squashfs$
+#     line: blacklist squashfs
+#   when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+
+# udf
+- name: Ensure kernel module 'udf' is disabled
+  lineinfile:
+    create: true
+    dest: /etc/modprobe.d/udf.conf
+    regexp: udf
+    line: install udf /bin/true
+  when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+
+- name: Ensure kernel module 'udf' is blacklisted
+  lineinfile:
+    create: true
+    dest: /etc/modprobe.d/udf.conf
+    regexp: ^blacklist udf$
+    line: blacklist udf
+  when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+
+# usb-storage
+- name: Ensure kernel module 'usb-storage' is disabled
+  lineinfile:
+    create: true
+    dest: /etc/modprobe.d/usb-storage.conf
+    regexp: usb-storage
+    line: install usb-storage /bin/true
+  when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+
+- name: Ensure kernel module 'usb-storage' is blacklisted
+  lineinfile:
+    create: true
+    dest: /etc/modprobe.d/usb-storage.conf
+    regexp: ^blacklist usb-storage$
+    line: blacklist usb-storage
+  when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]

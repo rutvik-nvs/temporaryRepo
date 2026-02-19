@@ -1,0 +1,35 @@
+- name: Ensure AIDE is installed
+  ansible.builtin.dnf:
+    name: aide
+    state: present
+    
+- name: Build and Test AIDE Database
+  ansible.builtin.command: /usr/sbin/aide --init
+  changed_when: true
+  when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+
+- name: Check whether the stock AIDE Database exists
+  ansible.builtin.stat:
+    path: /var/lib/aide/aide.db.new.gz
+  register: aide_database_stat
+  when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+
+- name: Stage AIDE Database
+  ansible.builtin.copy:
+    src: /var/lib/aide/aide.db.new.gz
+    dest: /var/lib/aide/aide.db.gz
+    backup: true
+    remote_src: true
+  when:
+    - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+    - (aide_database_stat.stat.exists is defined and aide_database_stat.stat.exists)
+
+- name: Configure Periodic Execution of AIDE
+  ansible.builtin.cron:
+    name: run AIDE check
+    minute: 5
+    hour: 4
+    weekday: 0
+    user: root
+    job: /usr/sbin/aide --check
+  when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]

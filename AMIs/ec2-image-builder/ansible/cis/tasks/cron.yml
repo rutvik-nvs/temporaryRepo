@@ -1,0 +1,68 @@
+# Ensure that /etc/at.deny does not exist
+- name: Remove /etc/at.deny
+  file:
+    path: /etc/at.deny
+    state: absent
+  when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+
+# Ensure that /etc/cron.deny does not exist
+- name: Remove /etc/cron.deny
+  file:
+    path: /etc/cron.deny
+    state: absent
+  when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+
+# Verify Permissions on cron.d
+- name: Set permissions for /etc/cron.d/
+  file:
+    path: /etc/cron.d/
+    state: directory
+    mode: u-s,g-xwrs,o-xwrt
+  when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+
+# Verify Permissions on cron.daily
+- name: Set permissions for /etc/cron.daily/
+  file:
+    path: /etc/cron.daily/
+    state: directory
+    mode: u-s,g-xwrs,o-xwrt
+  when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+
+# Verify Permissions on cron.hourly
+- name: Set permissions for /etc/cron.hourly/
+  file:
+    path: /etc/cron.hourly/
+    state: directory
+    mode: u-s,g-xwrs,o-xwrt
+  when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+
+# Verify Permissions on cron.monthly
+- name: Set permissions for /etc/cron.monthly/
+  file:
+    path: /etc/cron.monthly/
+    state: directory
+    mode: u-s,g-xwrs,o-xwrt
+  when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+
+# Verify Permissions on cron.weekly
+- name: Set permissions for /etc/cron.weekly/
+  file:
+    path: /etc/cron.weekly/
+    state: directory
+    mode: u-s,g-xwrs,o-xwrt
+  when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+
+# Verify Permissions on crontab
+- name: Test for existence /etc/crontab
+  stat:
+    path: /etc/crontab
+  register: file_exists
+  when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+
+- name: Ensure permission u-xs,g-xwrs,o-xwrt on /etc/crontab
+  file:
+    path: /etc/crontab
+    mode: u-xs,g-xwrs,o-xwrt
+  when:
+  - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+  - file_exists.stat is defined and file_exists.stat.exists

@@ -1,0 +1,69 @@
+# Ensure Sudo Logfile Exists - sudo logfile
+- name: XCCDF Value var_sudo_logfile # promote to variable
+  set_fact:
+    var_sudo_logfile: !!str /var/log/sudo.log
+  tags:
+    - always
+
+- name: Ensure logfile is enabled with the appropriate value in /etc/sudoers
+  lineinfile:
+    path: /etc/sudoers
+    regexp: ^[\s]*Defaults\s(.*)\blogfile=[-]?\w+\b(.*)$
+    line: Defaults \1logfile={{ var_sudo_logfile }}\2
+    validate: /usr/sbin/visudo -cf %s
+    backrefs: true
+  register: edit_sudoers_logfile_option
+
+- name: Enable logfile option with appropriate value in /etc/sudoers
+  lineinfile:
+    path: /etc/sudoers
+    line: Defaults logfile={{ var_sudo_logfile }}
+    validate: /usr/sbin/visudo -cf %s
+  when: edit_sudoers_logfile_option is defined and not edit_sudoers_logfile_option.changed
+
+  # Ensure Only Users Logged In To Real tty Can Execute Sudo - sudo use_pty
+- name: Ensure use_pty is enabled in /etc/sudoers
+  lineinfile:
+    path: /etc/sudoers
+    regexp: ^[\s]*Defaults.*\buse_pty\b.*$
+    line: Defaults use_pty
+    validate: /usr/sbin/visudo -cf %s
+
+# he operating system must require Re-Authentication when using the sudo command. Ensure sudo timestamp_timeout is appropriate - sudo timestamp_timeout
+- name: XCCDF Value var_sudo_timestamp_timeout # promote to variable
+  set_fact:
+    var_sudo_timestamp_timeout: !!str 5
+  tags:
+    - always
+
+- name: Find out if /etc/sudoers.d/* files contain 'Defaults timestamp_timeout' to
+    be deduplicated
+  find:
+    path: /etc/sudoers.d
+    patterns: '*'
+    contains: ^[\s]*Defaults\s.*\btimestamp_timeout=.*
+  register: sudoers_d_defaults_timestamp_timeout
+
+- name: Remove found occurrences of 'Defaults timestamp_timeout' from /etc/sudoers.d/*
+    files
+  lineinfile:
+    path: '{{ item.path }}'
+    regexp: ^[\s]*Defaults\s.*\btimestamp_timeout=.*
+    state: absent
+  with_items: '{{ sudoers_d_defaults_timestamp_timeout.files }}'
+
+- name: Ensure timestamp_timeout is enabled with the appropriate value in /etc/sudoers
+  lineinfile:
+    path: /etc/sudoers
+    regexp: ^[\s]*Defaults\s(.*)\btimestamp_timeout=[-]?\w+\b(.*)$
+    line: Defaults \1timestamp_timeout={{ var_sudo_timestamp_timeout }}\2
+    validate: /usr/sbin/visudo -cf %s
+    backrefs: true
+  register: edit_sudoers_timestamp_timeout_option
+
+- name: Enable timestamp_timeout option with appropriate value in /etc/sudoers
+  lineinfile:
+    path: /etc/sudoers
+    line: Defaults timestamp_timeout={{ var_sudo_timestamp_timeout }}
+    validate: /usr/sbin/visudo -cf %s
+  when: edit_sudoers_timestamp_timeout_option is defined and not edit_sudoers_timestamp_timeout_option.changed

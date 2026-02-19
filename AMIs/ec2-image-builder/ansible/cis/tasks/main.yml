@@ -1,0 +1,18 @@
+---
+# tasks file for cis
+# copy sysctl conf files required for CIS compliance
+- include_tasks: aide.yml
+- include_tasks: sysctl.yml
+- include_tasks: coredump.yml
+- include_tasks: dynamic-fs.yml
+- include_tasks: cron.yml
+- include_tasks: nfs.yml
+- include_tasks: login-banner.yml
+- include_tasks: ssh.yml
+- include_tasks: journald.yml
+- include_tasks: shm.yml
+- include_tasks: sudo.yml
+- include_tasks: timeout.yml
+- include_tasks: umask.yml
+- include_tasks: grub2.yml
+- include_tasks: login.yml

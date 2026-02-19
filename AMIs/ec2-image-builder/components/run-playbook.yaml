@@ -1,0 +1,38 @@
+name: RunAnsiblePlaybook
+schemaVersion: 1.0
+parameters:
+  - PlaybookS3Url:
+      type: string
+      description: "The S3 path to the zipped playbook"
+  - LvmScriptS3Url:
+      type: string
+      description: "The S3 path to the LVM setup script"
+phases:
+  - name: build
+    steps:
+      - name: DownloadLVMScript
+        action: S3Download
+        inputs:
+          - source: "{{ LvmScriptS3Url }}"
+            destination: /tmp/lvm-script.sh
+      - name: ExecuteLVMScript
+        action: ExecuteBash
+        inputs:
+          commands:
+            - chmod +x /tmp/lvm-script.sh
+            - /tmp/lvm-script.sh
+      - name: DownloadPlaybook
+        action: S3Download
+        inputs:
+          - source: "{{ PlaybookS3Url }}"
+            destination: /tmp/playbook.zip
+      - name: ExecutePlaybook
+        action: ExecuteBash
+        inputs:
+          commands:
+            - mkdir -p /tmp/ansible
+            - unzip /tmp/playbook.zip -d /tmp/ansible
+            - ansible-galaxy collection install amazon.aws
+            - ansible-galaxy collection install ansible.posix
+            - ansible-galaxy collection install community.general
+            - ansible-playbook /tmp/ansible/rhel8.yaml -i /tmp/ansible/inventory.ini

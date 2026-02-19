@@ -1,0 +1,36 @@
+# Set Interactive Session Timeout
+- name: XCCDF Value var_accounts_tmout # promote to variable
+  set_fact:
+    var_accounts_tmout: !!str 900
+  tags:
+    - always
+
+- name: Check for duplicate values
+  lineinfile:
+    path: /etc/profile.d/tmout.sh
+    create: false
+    regexp: TMOUT=
+    state: absent
+  check_mode: true
+  changed_when: false
+  register: dupes
+  when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+
+- name: Deduplicate values from /etc/profile.d/tmout.sh
+  lineinfile:
+    path: /etc/profile.d/tmout.sh
+    create: false
+    regexp: TMOUT=
+    state: absent
+  when:
+  - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+  - dupes.found is defined and dupes.found > 1
+
+- name: Insert correct line into /etc/profile.d/tmout.sh
+  lineinfile:
+    path: /etc/profile.d/tmout.sh
+    create: true
+    regexp: TMOUT=
+    line: declare -xr TMOUT={{ var_accounts_tmout }}
+    state: present
+  when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]

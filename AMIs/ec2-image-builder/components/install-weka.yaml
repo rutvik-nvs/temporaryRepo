@@ -1,0 +1,15 @@
+name: InstallWeka
+description: Install Weka
+schemaVersion: 1.0
+phases:
+  - name: build
+    steps:
+      - name: InstallWeka
+        action: ExecuteBash
+        inputs:
+          commands:
+            - curl https://Id6jQT4wbDJ7m2ts@get.weka.io/dist/v1/install/4.4.10.202/4.4.10.202 | sh
+            - weka version get 4.4.10.202
+            - weka version set 4.4.10.202
+            - weka local setup container --name client --no-start
+            - weka version prepare 4.4.10.202

@@ -1,0 +1,75 @@
+# Ensure the Default Bash Umask is Set Correctly
+- name: XCCDF Value var_accounts_user_umask # promote to variable
+  set_fact:
+    var_accounts_user_umask: !!str 027
+  tags:
+    - always
+
+- name: Replace user umask in /etc/bashrc
+  replace:
+    path: /etc/bashrc
+    regexp: umask.*
+    replace: umask {{ var_accounts_user_umask }}
+  register: umask_replace
+
+- name: Append user umask in /etc/bashrc
+  lineinfile:
+    create: true
+    path: /etc/bashrc
+    line: umask {{ var_accounts_user_umask }}
+  when: umask_replace is not changed
+
+# Ensure the Default Umask is Set Correctly in login.defs
+- name: Gather the package facts
+  package_facts:
+    manager: auto
+
+- name: XCCDF Value var_accounts_user_umask # promote to variable
+  set_fact:
+    var_accounts_user_umask: !!str 027
+
+- name: Ensure the Default UMASK is Set Correctly
+  replace:
+    path: /etc/login.defs
+    regexp: ^UMASK
+    replace: UMASK {{ var_accounts_user_umask }}
+  register: umask_replace
+  when: '"shadow-utils" in ansible_facts.packages'
+
+- name: Ensure the Default UMASK is Appended Correctly
+  lineinfile:
+    create: true
+    path: /etc/login.defs
+    line: UMASK {{ var_accounts_user_umask }}
+  when:
+  - '"shadow-utils" in ansible_facts.packages'
+  - umask_replace is not changed
+
+  # Ensure the Default Umask is Set Correctly in /etc/profile
+- name: XCCDF Value var_accounts_user_umask # promote to variable
+  set_fact:
+    var_accounts_user_umask: !!str 027
+  tags:
+    - always
+
+- name: Check if umask is already set
+  ansible.builtin.lineinfile:
+    path: /etc/profile
+    regexp: (^[\s]*[^#]umask)\s+(\d+)
+    state: absent
+  check_mode: true
+  changed_when: false
+  register: result_umask_is_set
+
+- name: Replace user umask in /etc/profile
+  ansible.builtin.replace:
+    path: /etc/profile
+    regexp: ^(\s*)umask\s+\d+
+    replace: \1umask {{ var_accounts_user_umask }}
+
+- name: Append user umask in /etc/profile
+  ansible.builtin.lineinfile:
+    create: true
+    path: /etc/profile
+    line: umask {{ var_accounts_user_umask }}
+  when: result_umask_is_set.found == 0

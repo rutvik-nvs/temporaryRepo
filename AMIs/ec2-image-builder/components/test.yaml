@@ -1,0 +1,10 @@
+name: RunTests
+schemaVersion: 1.0
+phases:
+  - name: test
+    steps:
+      - name: BasicTest
+        action: ExecuteBash
+        inputs:
+          commands:
+            - echo "Testing complete!"
